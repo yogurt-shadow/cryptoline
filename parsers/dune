@@ -1,0 +1,16 @@
+(library
+  (name        parsers)
+  (libraries   ast str typecheck)
+  (public_name cryptoline.parsers)
+)
+
+; (ocamllex    legacyCryptolineLexer)
+; (ocamlyacc   legacyCryptolineParser)
+; (ocamllex    untypedCryptolineLexer)
+; (ocamlyacc   untypedCryptolineParser)
+; (ocamllex    vectorCryptolineLexer)
+; (ocamlyacc   vectorCryptolineParser)
+(ocamllex    cryptolineLexer)
+(ocamlyacc   cryptolineParser)
+(ocamllex    specLexer)
+(ocamlyacc   specParser)

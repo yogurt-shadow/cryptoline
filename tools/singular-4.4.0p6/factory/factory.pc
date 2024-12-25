@@ -1,0 +1,17 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: factory
+Description: The Singular factorization library
+Version: 4.4.0
+URL: https://github.com/Singular/Sources/tree/spielwiese/factory
+
+Requires:  omalloc singular_resources
+Conflicts:
+
+Cflags: -I${includedir} -DSING_NDEBUG -DOM_NDEBUG  
+Libs: -L${libdir} -lfactory -lflint -lmpfr -lgmp -lntl -lgmp
+Libs.private:
+

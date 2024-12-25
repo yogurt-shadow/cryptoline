@@ -1,0 +1,17 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: singular_resources
+Description: The Singular resources manager
+Version: 4.4.0
+URL: https://github.com/Singular/Sources/tree/spielwiese/singular_resources
+
+# Requires:
+# Conflicts:
+
+Cflags: -I${includedir} -DSING_NDEBUG -DOM_NDEBUG
+Libs: -L${libdir} -lsingular_resources
+# Libs.private:
+

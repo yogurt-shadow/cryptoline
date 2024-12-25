@@ -1,0 +1,17 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libpolys
+Description: The Singular polynomial/coefficient arithmetic and related supporting functionality
+Version: 4.4.0
+URL: https://github.com/Singular/Sources/tree/spielwiese/libpolys
+
+Requires:  omalloc singular_resources factory
+Conflicts:
+
+Cflags: -I${includedir} -I${includedir}/singular -DSING_NDEBUG -DOM_NDEBUG   
+Libs: -L${libdir} -lpolys -lflint -lmpfr -lgmp -lgmp 
+Libs.private:
+

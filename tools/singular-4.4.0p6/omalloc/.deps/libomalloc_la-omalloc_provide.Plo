@@ -1,0 +1,4 @@
+libomalloc_la-omalloc_provide.lo: omalloc_provide.c \
+ /usr/include/stdc-predef.h omConfig.h
+/usr/include/stdc-predef.h:
+omConfig.h:

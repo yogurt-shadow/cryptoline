@@ -1,0 +1,17 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libSingular
+Description: The Singular high level functionality
+Version: 4.4.0
+URL: https://github.com/Singular/Sources/
+
+Requires:  omalloc singular_resources factory libpolys
+Conflicts:
+
+Cflags: -I${includedir} -I${includedir}/singular -DSING_NDEBUG -DOM_NDEBUG
+Libs: -L${libdir} -lSingular 
+Libs.private:
+

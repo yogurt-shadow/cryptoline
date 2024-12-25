@@ -1,0 +1,3 @@
+libomalloc_la-omList.lo: omList.c /usr/include/stdc-predef.h omConfig.h
+/usr/include/stdc-predef.h:
+omConfig.h:

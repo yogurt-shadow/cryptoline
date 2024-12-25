@@ -1,0 +1,26 @@
+(library
+ (name          aig)
+ (foreign_stubs (language c) (names aiger compatibility aig_stubs))
+;; (preprocess
+;;  (action (run %{bin:cppo} -V OCAML:%{ocaml_version} %{input-file})))
+)
+
+(rule
+  (target  compatibility.c)
+  (deps    gen_compatibility_c.sh)
+  (action
+    (with-stdout-to %{target}
+      (run ./gen_compatibility_c.sh %{ocaml_version})
+    )
+  )
+)
+
+(rule
+  (target  compatibility.h)
+  (deps    gen_compatibility_h.sh)
+  (action
+    (with-stdout-to %{target}
+      (run ./gen_compatibility_h.sh %{ocaml_version})
+    )
+  )
+)

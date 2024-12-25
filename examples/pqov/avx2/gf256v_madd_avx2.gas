@@ -1,0 +1,215 @@
+#! %edx = %rdx
+#! %ecx = %rcx
+#! %edi = %rdi
+#! %dil = %rdi
+#! %r$1cd = %r$1c
+#! %r$1cb = %r$1c
+
+#! $1c(%rbp) = %%EA
+#! $1c(%rdi) = %%EA
+#! $1c(%rip) = %%EA
+#! (%rax) = %%EA
+#! (%rsi) = %%EA
+
+#! %rax = %%rax
+#! %rcx = %%rcx
+#! %rdi = %%rdi
+#! %rdx = %%rdx
+#! %rsp = %%rsp
+#! %rbp = %%rbp
+#! %rsi = %%rsi
+#! %r$1c = %%r$1c
+#! %xmm$1c = %%xmm$1c
+#! %ymm$1c = %%ymm$1c
+
+#! push $1v -> (* push $1v *)\nnop
+#! push $1c\($2v\) -> (* push $1c($2v) *)\nnop
+#! pop $1v -> (* pop $1v *)\nnop
+#! nopl $1v -> (* nopl $1v *)\nnop
+#! leave .* -> (* leave *)\nnop
+#! cmp $1v, $2v -> (* cmp $1v, $2v *)\nnop
+#! lea $1c\($2v\), $3v -> (* lea $1c($2v), $3v *)\nnop
+
+#! mov $1v, $2v -> mov $2v $1v
+#! movzbl $1v, $2v -> mov $2v $1v
+#! and $1c, $2v -> and $2v@uint64 ($1c)@uint64 $2v
+#! sub $1c, $2v -> subb dontcare $2v $2v ($1c)@uint64
+#! add $1v, $2v -> adds dontcare $2v $1v $2v
+#! add $1c, $2v -> adds dontcare $2v ($1c)@uint64 $2v
+# shr $1c, $2v -> shr $2v $2v ($1c)@uint64
+#! shr $1c, $2v -> shrs $2v dontcare $2v ($1c)
+# shl $1c, $2v -> shl $2v $2v ($1c)@uint64
+#! shl $1c, $2v -> shls dontcare $2v $2v ($1c)
+
+#! vmovd $1v, $2xmm -> vpc $1v_u16@uint16 $1v;\nmov %$2xmm [$1v_u16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16]
+
+#! vpbroadcastw $1xmm, $2ymm -> mov [$1xmm_0, $1xmm_1, $1xmm_2, $1xmm_3, $1xmm_4, $1xmm_5, $1xmm_6, $1xmm_7] %$1xmm;\nmov %$2ymm [$1xmm_0, $1xmm_0, $1xmm_0, $1xmm_0, $1xmm_0, $1xmm_0, $1xmm_0, $1xmm_0,\n           $1xmm_0, $1xmm_0, $1xmm_0, $1xmm_0, $1xmm_0, $1xmm_0, $1xmm_0, $1xmm_0]
+
+# vpxor $1xmm, $1xmm, $1xmm -> mov %$1xmm [0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16]
+# vpxor $1xmm, $1xmm, $1xmm -> mov %$1ymm [0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16]
+#! vpxor %%xmm3, %%xmm3, %%xmm3 -> mov %ymm3 [0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16,\n           0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16, 0@uint16]
+
+#! vpxor $1ymm, $2ymm, $3ymm -> xor %$3ymm %$1ymm %$2ymm
+
+#! vmovdqa $1ea, $2ymm -> mov %$2ymm [$1ea, $1ea[+2], $1ea[+4], $1ea[+6],\n           $1ea[+8], $1ea[+10], $1ea[+12], $1ea[+14],\n           $1ea[+16], $1ea[+18], $1ea[+20], $1ea[+22],\n           $1ea[+24], $1ea[+26], $1ea[+28], $1ea[+30]]
+
+#! vmovdqa $1ymm, $2ea -> mov [$1ymm_0, $1ymm_1, $1ymm_2, $1ymm_3, $1ymm_4, $1ymm_5, $1ymm_6, $1ymm_7,\n     $1ymm_8, $1ymm_9, $1ymm_a, $1ymm_b, $1ymm_c, $1ymm_d, $1ymm_e, $1ymm_f] %$1ymm;\nmov $2ea $1ymm_0;\nmov $2ea[+2] $1ymm_1;\nmov $2ea[+4] $1ymm_2;\nmov $2ea[+6] $1ymm_3;\nmov $2ea[+8] $1ymm_4;\nmov $2ea[+10] $1ymm_5;\nmov $2ea[+12] $1ymm_6;\nmov $2ea[+14] $1ymm_7;\nmov $2ea[+16] $1ymm_8;\nmov $2ea[+18] $1ymm_9;\nmov $2ea[+20] $1ymm_a;\nmov $2ea[+22] $1ymm_b;\nmov $2ea[+24] $1ymm_c;\nmov $2ea[+26] $1ymm_d;\nmov $2ea[+28] $1ymm_e;\nmov $2ea[+30] $1ymm_f
+
+#! vmovdqa $1ymm, $2ymm -> mov %$2ymm %$1ymm
+
+#! vperm2i128 \$0x0, $1ymm, $2ymm, $3ymm -> mov [$2ymm_0, $2ymm_1, $2ymm_2, $2ymm_3, $2ymm_4, $2ymm_5, $2ymm_6, $2ymm_7,\n     $2ymm_8, $2ymm_9, $2ymm_a, $2ymm_b, $2ymm_c, $2ymm_d, $2ymm_e, $2ymm_f] %$2ymm;\nmov %$3ymm [$2ymm_0, $2ymm_1, $2ymm_2, $2ymm_3, $2ymm_4, $2ymm_5, $2ymm_6, $2ymm_7,\n           $2ymm_0, $2ymm_1, $2ymm_2, $2ymm_3, $2ymm_4, $2ymm_5, $2ymm_6, $2ymm_7]
+
+#! vperm2i128 \$0x11, $1ymm, $2ymm, $3ymm -> mov [$2ymm_0, $2ymm_1, $2ymm_2, $2ymm_3, $2ymm_4, $2ymm_5, $2ymm_6, $2ymm_7,\n     $2ymm_8, $2ymm_9, $2ymm_a, $2ymm_b, $2ymm_c, $2ymm_d, $2ymm_e, $2ymm_f] %$2ymm;\nmov %$3ymm [$2ymm_8, $2ymm_9, $2ymm_a, $2ymm_b, $2ymm_c, $2ymm_d, $2ymm_e, $2ymm_f,\n           $2ymm_8, $2ymm_9, $2ymm_a, $2ymm_b, $2ymm_c, $2ymm_d, $2ymm_e, $2ymm_f]
+
+
+# vpshufb $1ymm, $2ymm, $3ymm -> call ymmw2b (%$1ymm, %$1ymm_byte);\ncall ymmw2b (%$2ymm, %$2ymm_byte);\ncall vpshufb256 (%$2ymm_byte, %$1ymm_byte, %tmp);\ncall ymmb2w (%tmp, %$3ymm)
+
+#! vpshufb $1ymm, $2ymm, $3ymm -> mov [$1ymm_0, $1ymm_1, $1ymm_2, $1ymm_3, $1ymm_4, $1ymm_5, $1ymm_6, $1ymm_7,\n     $1ymm_8, $1ymm_9, $1ymm_a, $1ymm_b, $1ymm_c, $1ymm_d, $1ymm_e, $1ymm_f] %$1ymm;\ncall ymmw2b ($1ymm_0, $1ymm_1, $1ymm_2, $1ymm_3, $1ymm_4, $1ymm_5, $1ymm_6, $1ymm_7,\n             $1ymm_8, $1ymm_9, $1ymm_a, $1ymm_b, $1ymm_c, $1ymm_d, $1ymm_e, $1ymm_f,\n             $1ymm_0l, $1ymm_0h, $1ymm_1l, $1ymm_1h, $1ymm_2l, $1ymm_2h, $1ymm_3l, $1ymm_3h,\n             $1ymm_4l, $1ymm_4h, $1ymm_5l, $1ymm_5h, $1ymm_6l, $1ymm_6h, $1ymm_7l, $1ymm_7h,\n             $1ymm_8l, $1ymm_8h, $1ymm_9l, $1ymm_9h, $1ymm_al, $1ymm_ah, $1ymm_bl, $1ymm_bh,\n             $1ymm_cl, $1ymm_ch, $1ymm_dl, $1ymm_dh, $1ymm_el, $1ymm_eh, $1ymm_fl, $1ymm_fh);\nmov [$2ymm_0, $2ymm_1, $2ymm_2, $2ymm_3, $2ymm_4, $2ymm_5, $2ymm_6, $2ymm_7,\n     $2ymm_8, $2ymm_9, $2ymm_a, $2ymm_b, $2ymm_c, $2ymm_d, $2ymm_e, $2ymm_f] %$2ymm;\ncall ymmw2b ($2ymm_0, $2ymm_1, $2ymm_2, $2ymm_3, $2ymm_4, $2ymm_5, $2ymm_6, $2ymm_7,\n             $2ymm_8, $2ymm_9, $2ymm_a, $2ymm_b, $2ymm_c, $2ymm_d, $2ymm_e, $2ymm_f,\n             $2ymm_0l, $2ymm_0h, $2ymm_1l, $2ymm_1h, $2ymm_2l, $2ymm_2h, $2ymm_3l, $2ymm_3h,\n             $2ymm_4l, $2ymm_4h, $2ymm_5l, $2ymm_5h, $2ymm_6l, $2ymm_6h, $2ymm_7l, $2ymm_7h,\n             $2ymm_8l, $2ymm_8h, $2ymm_9l, $2ymm_9h, $2ymm_al, $2ymm_ah, $2ymm_bl, $2ymm_bh,\n             $2ymm_cl, $2ymm_ch, $2ymm_dl, $2ymm_dh, $2ymm_el, $2ymm_eh, $2ymm_fl, $2ymm_fh);\ncall vpshufb256 ($2ymm_0l, $2ymm_0h, $2ymm_1l, $2ymm_1h, $2ymm_2l, $2ymm_2h, $2ymm_3l, $2ymm_3h,\n                 $2ymm_4l, $2ymm_4h, $2ymm_5l, $2ymm_5h, $2ymm_6l, $2ymm_6h, $2ymm_7l, $2ymm_7h,\n                 $2ymm_8l, $2ymm_8h, $2ymm_9l, $2ymm_9h, $2ymm_al, $2ymm_ah, $2ymm_bl, $2ymm_bh,\n                 $2ymm_cl, $2ymm_ch, $2ymm_dl, $2ymm_dh, $2ymm_el, $2ymm_eh, $2ymm_fl, $2ymm_fh,\n                 $1ymm_0l, $1ymm_0h, $1ymm_1l, $1ymm_1h, $1ymm_2l, $1ymm_2h, $1ymm_3l, $1ymm_3h,\n                 $1ymm_4l, $1ymm_4h, $1ymm_5l, $1ymm_5h, $1ymm_6l, $1ymm_6h, $1ymm_7l, $1ymm_7h,\n                 $1ymm_8l, $1ymm_8h, $1ymm_9l, $1ymm_9h, $1ymm_al, $1ymm_ah, $1ymm_bl, $1ymm_bh,\n                 $1ymm_cl, $1ymm_ch, $1ymm_dl, $1ymm_dh, $1ymm_el, $1ymm_eh, $1ymm_fl, $1ymm_fh,\n                 $3ymm_0l, $3ymm_0h, $3ymm_1l, $3ymm_1h, $3ymm_2l, $3ymm_2h, $3ymm_3l, $3ymm_3h,\n                 $3ymm_4l, $3ymm_4h, $3ymm_5l, $3ymm_5h, $3ymm_6l, $3ymm_6h, $3ymm_7l, $3ymm_7h,\n                 $3ymm_8l, $3ymm_8h, $3ymm_9l, $3ymm_9h, $3ymm_al, $3ymm_ah, $3ymm_bl, $3ymm_bh,\n                 $3ymm_cl, $3ymm_ch, $3ymm_dl, $3ymm_dh, $3ymm_el, $3ymm_eh, $3ymm_fl, $3ymm_fh);\ncall ymmb2w ($3ymm_0l, $3ymm_0h, $3ymm_1l, $3ymm_1h, $3ymm_2l, $3ymm_2h, $3ymm_3l, $3ymm_3h,\n             $3ymm_4l, $3ymm_4h, $3ymm_5l, $3ymm_5h, $3ymm_6l, $3ymm_6h, $3ymm_7l, $3ymm_7h,\n             $3ymm_8l, $3ymm_8h, $3ymm_9l, $3ymm_9h, $3ymm_al, $3ymm_ah, $3ymm_bl, $3ymm_bh,\n             $3ymm_cl, $3ymm_ch, $3ymm_dl, $3ymm_dh, $3ymm_el, $3ymm_eh, $3ymm_fl, $3ymm_fh,\n             $3ymm_0, $3ymm_1, $3ymm_2, $3ymm_3, $3ymm_4, $3ymm_5, $3ymm_6, $3ymm_7,\n             $3ymm_8, $3ymm_9, $3ymm_a, $3ymm_b, $3ymm_c, $3ymm_d, $3ymm_e, $3ymm_f);\nmov %$3ymm [$3ymm_0, $3ymm_1, $3ymm_2, $3ymm_3, $3ymm_4, $3ymm_5, $3ymm_6, $3ymm_7,\n           $3ymm_8, $3ymm_9, $3ymm_a, $3ymm_b, $3ymm_c, $3ymm_d, $3ymm_e, $3ymm_f]
+
+
+#! vpand $1ymm, $2ymm, $3ymm -> and %$3ymm %$1ymm %$2ymm
+
+#! vpand $1ea, $2ymm, $3ymm -> mov %tmp [$1ea, $1ea[+2], $1ea[+4], $1ea[+6],\n          $1ea[+8], $1ea[+10], $1ea[+12], $1ea[+14],\n          $1ea[+16], $1ea[+18], $1ea[+20], $1ea[+22],\n          $1ea[+24], $1ea[+26], $1ea[+28], $1ea[+30]];\nand %$3ymm %tmp %$2ymm
+
+#! vpxor $1ea, $2ymm, $3ymm -> mov %tmp [$1ea, $1ea[+2], $1ea[+4], $1ea[+6],\n          $1ea[+8], $1ea[+10], $1ea[+12], $1ea[+14],\n          $1ea[+16], $1ea[+18], $1ea[+20], $1ea[+22],\n          $1ea[+24], $1ea[+26], $1ea[+28], $1ea[+30]];\nxor %$3ymm %tmp %$2ymm
+
+# vpsrlw $1c, $2ymm, $3ymm -> mov [$2ymm_0, $2ymm_1, $2ymm_2, $2ymm_3, $2ymm_4, $2ymm_5, $2ymm_6, $2ymm_7,\n     $2ymm_8, $2ymm_9, $2ymm_a, $2ymm_b, $2ymm_c, $2ymm_d, $2ymm_e, $2ymm_f] %$2ymm;\nshr $3ymm_0 $2ymm_0 $1c@uint16;\nshr $3ymm_1 $2ymm_1 $1c@uint16;\nshr $3ymm_2 $2ymm_2 $1c@uint16;\nshr $3ymm_3 $2ymm_3 $1c@uint16;\nshr $3ymm_4 $2ymm_4 $1c@uint16;\nshr $3ymm_5 $2ymm_5 $1c@uint16;\nshr $3ymm_6 $2ymm_6 $1c@uint16;\nshr $3ymm_7 $2ymm_7 $1c@uint16;\nshr $3ymm_8 $2ymm_8 $1c@uint16;\nshr $3ymm_9 $2ymm_9 $1c@uint16;\nshr $3ymm_a $2ymm_a $1c@uint16;\nshr $3ymm_b $2ymm_b $1c@uint16;\nshr $3ymm_c $2ymm_c $1c@uint16;\nshr $3ymm_d $2ymm_d $1c@uint16;\nshr $3ymm_e $2ymm_e $1c@uint16;\nshr $3ymm_f $2ymm_f $1c@uint16;\nmov %$3ymm [$3ymm_0, $3ymm_1, $3ymm_2, $3ymm_3, $3ymm_4, $3ymm_5, $3ymm_6, $3ymm_7,\n           $3ymm_8, $3ymm_9, $3ymm_a, $3ymm_b, $3ymm_c, $3ymm_d, $3ymm_e, $3ymm_f]
+
+#! vpsrlw $1c, $2ymm, $3ymm -> mov [$2ymm_0, $2ymm_1, $2ymm_2, $2ymm_3, $2ymm_4, $2ymm_5, $2ymm_6, $2ymm_7,\n     $2ymm_8, $2ymm_9, $2ymm_a, $2ymm_b, $2ymm_c, $2ymm_d, $2ymm_e, $2ymm_f] %$2ymm;\nshrs $3ymm_0 dontcare $2ymm_0 $1c;\nshrs $3ymm_1 dontcare $2ymm_1 $1c;\nshrs $3ymm_2 dontcare $2ymm_2 $1c;\nshrs $3ymm_3 dontcare $2ymm_3 $1c;\nshrs $3ymm_4 dontcare $2ymm_4 $1c;\nshrs $3ymm_5 dontcare $2ymm_5 $1c;\nshrs $3ymm_6 dontcare $2ymm_6 $1c;\nshrs $3ymm_7 dontcare $2ymm_7 $1c;\nshrs $3ymm_8 dontcare $2ymm_8 $1c;\nshrs $3ymm_9 dontcare $2ymm_9 $1c;\nshrs $3ymm_a dontcare $2ymm_a $1c;\nshrs $3ymm_b dontcare $2ymm_b $1c;\nshrs $3ymm_c dontcare $2ymm_c $1c;\nshrs $3ymm_d dontcare $2ymm_d $1c;\nshrs $3ymm_e dontcare $2ymm_e $1c;\nshrs $3ymm_f dontcare $2ymm_f $1c;\nmov %$3ymm [$3ymm_0, $3ymm_1, $3ymm_2, $3ymm_3, $3ymm_4, $3ymm_5, $3ymm_6, $3ymm_7,\n           $3ymm_8, $3ymm_9, $3ymm_a, $3ymm_b, $3ymm_c, $3ymm_d, $3ymm_e, $3ymm_f]
+
+#! vpcmpgtw $1ymm, $2ymm, $3ymm -> mov [$1ymm_0, $1ymm_1, $1ymm_2, $1ymm_3, $1ymm_4, $1ymm_5, $1ymm_6, $1ymm_7,\n     $1ymm_8, $1ymm_9, $1ymm_a, $1ymm_b, $1ymm_c, $1ymm_d, $1ymm_e, $1ymm_f] %$1ymm;\nassert true && $1ymm_0 = 0@16;\nassert true && $1ymm_1 = 0@16;\nassert true && $1ymm_2 = 0@16;\nassert true && $1ymm_3 = 0@16;\nassert true && $1ymm_4 = 0@16;\nassert true && $1ymm_5 = 0@16;\nassert true && $1ymm_6 = 0@16;\nassert true && $1ymm_7 = 0@16;\nassert true && $1ymm_8 = 0@16;\nassert true && $1ymm_9 = 0@16;\nassert true && $1ymm_a = 0@16;\nassert true && $1ymm_b = 0@16;\nassert true && $1ymm_c = 0@16;\nassert true && $1ymm_d = 0@16;\nassert true && $1ymm_e = 0@16;\nassert true && $1ymm_f = 0@16;\nmov [$2ymm_0, $2ymm_1, $2ymm_2, $2ymm_3, $2ymm_4, $2ymm_5, $2ymm_6, $2ymm_7,\n     $2ymm_8, $2ymm_9, $2ymm_a, $2ymm_b, $2ymm_c, $2ymm_d, $2ymm_e, $2ymm_f] %$2ymm;\ncall cmpgt0w($2ymm_0, tmp0);\ncmov $3ymm_0 tmp0 0xffff@uint16 0@uint16;\ncall cmpgt0w($2ymm_1, tmp1);\ncmov $3ymm_1 tmp1 0xffff@uint16 0@uint16;\ncall cmpgt0w($2ymm_2, tmp2);\ncmov $3ymm_2 tmp2 0xffff@uint16 0@uint16;\ncall cmpgt0w($2ymm_3, tmp3);\ncmov $3ymm_3 tmp3 0xffff@uint16 0@uint16;\ncall cmpgt0w($2ymm_4, tmp4);\ncmov $3ymm_4 tmp4 0xffff@uint16 0@uint16;\ncall cmpgt0w($2ymm_5, tmp5);\ncmov $3ymm_5 tmp5 0xffff@uint16 0@uint16;\ncall cmpgt0w($2ymm_6, tmp6);\ncmov $3ymm_6 tmp6 0xffff@uint16 0@uint16;\ncall cmpgt0w($2ymm_7, tmp7);\ncmov $3ymm_7 tmp7 0xffff@uint16 0@uint16;\ncall cmpgt0w($2ymm_8, tmp8);\ncmov $3ymm_8 tmp8 0xffff@uint16 0@uint16;\ncall cmpgt0w($2ymm_9, tmp9);\ncmov $3ymm_9 tmp9 0xffff@uint16 0@uint16;\ncall cmpgt0w($2ymm_a, tmpa);\ncmov $3ymm_a tmpa 0xffff@uint16 0@uint16;\ncall cmpgt0w($2ymm_b, tmpb);\ncmov $3ymm_b tmpb 0xffff@uint16 0@uint16;\ncall cmpgt0w($2ymm_c, tmpc);\ncmov $3ymm_c tmpc 0xffff@uint16 0@uint16;\ncall cmpgt0w($2ymm_d, tmpd);\ncmov $3ymm_d tmpd 0xffff@uint16 0@uint16;\ncall cmpgt0w($2ymm_e, tmpe);\ncmov $3ymm_e tmpe 0xffff@uint16 0@uint16;\ncall cmpgt0w($2ymm_f, tmpf);\ncmov $3ymm_f tmpf 0xffff@uint16 0@uint16;\nmov %$3ymm [$3ymm_0, $3ymm_1, $3ymm_2, $3ymm_3, $3ymm_4, $3ymm_5, $3ymm_6, $3ymm_7,\n           $3ymm_8, $3ymm_9, $3ymm_a, $3ymm_b, $3ymm_c, $3ymm_d, $3ymm_e, $3ymm_f]
+
+
+#gf256v_madd_avx2:
+# %rdi = 0x7fffffffc980
+# %rsi = 0x7fffffffc920
+# %rdx = 0x44
+# %rcx = 0x40
+# %r8  = 0x7fffffff8cc0
+# %r9  = 0x7fffffffca90
+	#! -> SP = 0x7fffffffc8f8
+	push   %r13                                     #! EA = L0x7fffffffc8f0; PC = 0x55555555f530
+	mov    %edx,%r9d                                #! PC = 0x55555555f532
+	mov    %rdi,%r8                                 #! PC = 0x55555555f535
+	mov    %ecx,%edx                                #! PC = 0x55555555f538
+	movzbl %r9b,%edi                                #! PC = 0x55555555f53a
+	lea    0x10(%rsp),%r13                          #! PC = 0x55555555f53e
+	and    $0xffffffffffffffe0,%rsp                 #! PC = 0x55555555f543
+	push   -0x8(%r13)                               #! EA = L0x7fffffffc8d8; PC = 0x55555555f547
+	push   %rbp                                     #! EA = L0x7fffffffc8d0; PC = 0x55555555f54b
+	mov    %rsp,%rbp                                #! PC = 0x55555555f54c
+	push   %r13                                     #! EA = L0x7fffffffc8c8; PC = 0x55555555f54f
+	sub    $0x8,%rsp                                #! PC = 0x55555555f551
+	#call   0x55555555c170 <tbl32_gf256_multab>     #! PC = 0x55555555f555
+	#! -> SP = 0x7fffffffc8b8
+	movzbl %dil,%edi                                #! PC = 0x55555555c170
+	vmovdqa 0x12ec4(%rip),%ymm5        # 0x55555556f040#! EA = L0x55555556f040; Value = 0x0001000100010001; PC = 0x55555555c174
+	vpxor  %xmm3,%xmm3,%xmm3                        #! PC = 0x55555555c17c
+	vmovdqa 0x12ed8(%rip),%ymm7        # 0x55555556f060#! EA = L0x55555556f060; Value = 0x0004000400040004; PC = 0x55555555c180
+	vmovd  %edi,%xmm1                               #! PC = 0x55555555c188
+	vmovdqa 0x12f0c(%rip),%ymm6        # 0x55555556f0a0#! EA = L0x55555556f0a0; Value = 0x0040004000400040; PC = 0x55555555c18c
+	vpbroadcastw %xmm1,%ymm1                        #! PC = 0x55555555c194
+	vpand  %ymm1,%ymm5,%ymm0                        #! PC = 0x55555555c199
+	vpsrlw $0x1,%ymm1,%ymm4                         #! PC = 0x55555555c19d
+	vpand  %ymm1,%ymm7,%ymm2                        #! PC = 0x55555555c1a2
+	vpcmpgtw %ymm3,%ymm0,%ymm0                      #! PC = 0x55555555c1a6
+	vpcmpgtw %ymm3,%ymm2,%ymm2                      #! PC = 0x55555555c1aa
+	vpand  0x14f8a(%rip),%ymm0,%ymm0        # 0x555555571140 <__gf256_mulbase>#! EA = L0x555555571140; Value = 0x0706050403020100; PC = 0x55555555c1ae
+	vpand  0x14fc2(%rip),%ymm2,%ymm2        # 0x555555571180 <__gf256_mulbase+64>#! EA = L0x555555571180; Value = 0x1c1814100c080400; PC = 0x55555555c1b6
+	vpand  %ymm4,%ymm5,%ymm5                        #! PC = 0x55555555c1be
+	vpand  %ymm4,%ymm7,%ymm7                        #! PC = 0x55555555c1c2
+	vpcmpgtw %ymm3,%ymm5,%ymm5                      #! PC = 0x55555555c1c6
+	vpcmpgtw %ymm3,%ymm7,%ymm7                      #! PC = 0x55555555c1ca
+	vpand  0x14f8a(%rip),%ymm5,%ymm5        # 0x555555571160 <__gf256_mulbase+32>#! EA = L0x555555571160; Value = 0x0e0c0a0806040200; PC = 0x55555555c1ce
+	vpxor  %ymm2,%ymm0,%ymm0                        #! PC = 0x55555555c1d6
+	vmovdqa 0x12e9e(%rip),%ymm2        # 0x55555556f080#! EA = L0x55555556f080; Value = 0x0010001000100010; PC = 0x55555555c1da
+	vpand  0x14fb6(%rip),%ymm7,%ymm7        # 0x5555555711a0 <__gf256_mulbase+96>#! EA = L0x5555555711a0; Value = 0x3830282018100800; PC = 0x55555555c1e2
+	vpand  %ymm1,%ymm2,%ymm8                        #! PC = 0x55555555c1ea
+	vpand  %ymm1,%ymm6,%ymm1                        #! PC = 0x55555555c1ee
+	vpand  %ymm4,%ymm2,%ymm2                        #! PC = 0x55555555c1f2
+	vpcmpgtw %ymm3,%ymm8,%ymm8                      #! PC = 0x55555555c1f6
+	vpcmpgtw %ymm3,%ymm1,%ymm1                      #! PC = 0x55555555c1fa
+	vpand  %ymm4,%ymm6,%ymm6                        #! PC = 0x55555555c1fe
+	vpcmpgtw %ymm3,%ymm2,%ymm2                      #! PC = 0x55555555c202
+	vpcmpgtw %ymm3,%ymm6,%ymm6                      #! PC = 0x55555555c206
+	vpand  0x14fae(%rip),%ymm8,%ymm8        # 0x5555555711c0 <__gf256_mulbase+128>#! EA = L0x5555555711c0; Value = 0x7060504030201000; PC = 0x55555555c20a
+	vpand  0x14fe6(%rip),%ymm1,%ymm1        # 0x555555571200 <__gf256_mulbase+192>#! EA = L0x555555571200; Value = 0xdb9b5b1bc0804000; PC = 0x55555555c212
+	vpand  0x14fbe(%rip),%ymm2,%ymm2        # 0x5555555711e0 <__gf256_mulbase+160>#! EA = L0x5555555711e0; Value = 0xe0c0a08060402000; PC = 0x55555555c21a
+	vpxor  %ymm7,%ymm5,%ymm5                        #! PC = 0x55555555c222
+	vpand  0x14ff2(%rip),%ymm6,%ymm6        # 0x555555571220 <__gf256_mulbase+224>#! EA = L0x555555571220; Value = 0xad2db6369b1b8000; PC = 0x55555555c226
+	vpxor  %ymm1,%ymm8,%ymm1                        #! PC = 0x55555555c22e
+	vpxor  %ymm1,%ymm0,%ymm0                        #! PC = 0x55555555c232
+	vpxor  %ymm6,%ymm2,%ymm2                        #! PC = 0x55555555c236
+	vpxor  %ymm5,%ymm0,%ymm0                        #! PC = 0x55555555c23a
+	vpxor  %ymm2,%ymm0,%ymm0                        #! PC = 0x55555555c23e
+	#! <- SP = 0x7fffffffc8b8
+	#ret                                            #! PC = 0x55555555c242
+	mov    -0x8(%rbp),%r13                          #! EA = L0x7fffffffc8c8; Value = 0x00007fffffffc900; PC = 0x55555555f55a
+	mov    %r8,%rdi                                 #! PC = 0x55555555f55e
+	leave                                           #! PC = 0x55555555f561
+	vmovdqa %ymm0,%ymm1                             #! PC = 0x55555555f562
+	vperm2i128 $0x0,%ymm0,%ymm0,%ymm0               #! PC = 0x55555555f566
+	lea    -0x10(%r13),%rsp                         #! PC = 0x55555555f56c
+	vperm2i128 $0x11,%ymm1,%ymm1,%ymm1              #! PC = 0x55555555f570
+	pop    %r13                                     #! EA = L0x7fffffffc8f0; Value = 0x000000000000002c; PC = 0x55555555f576
+	#jmp    0x55555555f4c0 <linearmap_8x8_accu_ymm.constprop.0>#! PC = 0x55555555f578
+	shr    $0x5,%edx                                #! PC = 0x55555555f4c0
+	#je     0x55555555f528 <linearmap_8x8_accu_ymm.constprop.0+104>#! PC = 0x55555555f4c3
+	lea    0x8(%rsp),%r10                           #! PC = 0x55555555f4c5
+	and    $0xffffffffffffffe0,%rsp                 #! PC = 0x55555555f4ca
+	vmovdqa %ymm0,%ymm5                             #! PC = 0x55555555f4ce
+	mov    %edx,%edx                                #! PC = 0x55555555f4d2
+	push   -0x8(%r10)                               #! EA = L0x7fffffffc8d8; PC = 0x55555555f4d4
+	shl    $0x5,%rdx                                #! PC = 0x55555555f4d8
+	vmovdqa %ymm1,%ymm6                             #! PC = 0x55555555f4dc
+	push   %rbp                                     #! EA = L0x7fffffffc8d0; PC = 0x55555555f4e0
+	add    %rsi,%rdx                                #! PC = 0x55555555f4e1
+	mov    %rsp,%rbp                                #! PC = 0x55555555f4e4
+	push   %r10                                     #! EA = L0x7fffffffc8c8; PC = 0x55555555f4e7
+	sub    $0x8,%rsp                                #! PC = 0x55555555f4e9
+	nopl   (%rax)                                   #! EA = L0x2b; PC = 0x55555555f4ed
+	vmovdqa (%rsi),%ymm2                            #! EA = L0x7fffffffc920; Value = 0x5e16ba87a641f697; PC = 0x55555555f4f0
+	vmovdqa %ymm6,%ymm1                             #! PC = 0x55555555f4f4
+	vmovdqa %ymm5,%ymm0                             #! PC = 0x55555555f4f8
+	add    $0x20,%rsi                               #! PC = 0x55555555f4fc
+	add    $0x20,%rdi                               #! PC = 0x55555555f500
+	#call   0x55555555f490 <linear_transform_8x8_256b.constprop.0>#! PC = 0x55555555f504
+	#! -> SP = 0x7fffffffc8b8
+	vmovdqa 0xfc28(%rip),%ymm3        # 0x55555556f0c0#! EA = L0x55555556f0c0; Value = 0x0f0f0f0f0f0f0f0f; PC = 0x55555555f490
+	vpand  %ymm3,%ymm2,%ymm4                        #! PC = 0x55555555f498
+	vpsrlw $0x4,%ymm2,%ymm2                         #! PC = 0x55555555f49c
+	vpand  %ymm3,%ymm2,%ymm2                        #! PC = 0x55555555f4a1
+	vpshufb %ymm4,%ymm0,%ymm0                       #! PC = 0x55555555f4a5
+	vpshufb %ymm2,%ymm1,%ymm1                       #! PC = 0x55555555f4aa
+	vpxor  %ymm1,%ymm0,%ymm0                        #! PC = 0x55555555f4af
+	#! <- SP = 0x7fffffffc8b8
+	#ret                                            #! PC = 0x55555555f4b3
+	vpxor  -0x20(%rdi),%ymm0,%ymm0                  #! EA = L0x7fffffffc980; Value = 0xf8567fcc82a19310; PC = 0x55555555f509
+	vmovdqa %ymm0,-0x20(%rdi)                       #! EA = L0x7fffffffc980; PC = 0x55555555f50e
+	cmp    %rdx,%rsi                                #! PC = 0x55555555f513
+	#jne    0x55555555f4f0 <linearmap_8x8_accu_ymm.constprop.0+48>#! PC = 0x55555555f516
+	vmovdqa (%rsi),%ymm2                            #! EA = L0x7fffffffc940; Value = 0xb9a385a25edc8faf; PC = 0x55555555f4f0
+	vmovdqa %ymm6,%ymm1                             #! PC = 0x55555555f4f4
+	vmovdqa %ymm5,%ymm0                             #! PC = 0x55555555f4f8
+	add    $0x20,%rsi                               #! PC = 0x55555555f4fc
+	add    $0x20,%rdi                               #! PC = 0x55555555f500
+	#call   0x55555555f490 <linear_transform_8x8_256b.constprop.0>#! PC = 0x55555555f504
+	#! -> SP = 0x7fffffffc8b8
+	vmovdqa 0xfc28(%rip),%ymm3        # 0x55555556f0c0#! EA = L0x55555556f0c0; Value = 0x0f0f0f0f0f0f0f0f; PC = 0x55555555f490
+	vpand  %ymm3,%ymm2,%ymm4                        #! PC = 0x55555555f498
+	vpsrlw $0x4,%ymm2,%ymm2                         #! PC = 0x55555555f49c
+	vpand  %ymm3,%ymm2,%ymm2                        #! PC = 0x55555555f4a1
+	vpshufb %ymm4,%ymm0,%ymm0                       #! PC = 0x55555555f4a5
+	vpshufb %ymm2,%ymm1,%ymm1                       #! PC = 0x55555555f4aa
+	vpxor  %ymm1,%ymm0,%ymm0                        #! PC = 0x55555555f4af
+	#! <- SP = 0x7fffffffc8b8
+	#ret                                            #! PC = 0x55555555f4b3
+	vpxor  -0x20(%rdi),%ymm0,%ymm0                  #! EA = L0x7fffffffc9a0; Value = 0xb2a78b3efc071377; PC = 0x55555555f509
+	vmovdqa %ymm0,-0x20(%rdi)                       #! EA = L0x7fffffffc9a0; PC = 0x55555555f50e
+	cmp    %rdx,%rsi                                #! PC = 0x55555555f513
+	#jne    0x55555555f4f0 <linearmap_8x8_accu_ymm.constprop.0+48>#! PC = 0x55555555f516
+	mov    -0x8(%rbp),%r10                          #! EA = L0x7fffffffc8c8; Value = 0x00007fffffffc900; PC = 0x55555555f518
+	leave                                           #! PC = 0x55555555f51c
+	lea    -0x8(%r10),%rsp                          #! PC = 0x55555555f51d
+	#! <- SP = 0x7fffffffc8f8
+	#ret                                            #! PC = 0x55555555f521

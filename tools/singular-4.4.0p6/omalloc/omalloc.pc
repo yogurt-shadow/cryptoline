@@ -1,0 +1,17 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: omalloc
+Description: The Singular memory manager
+Version: 0.9.6
+URL: https://github.com/Singular/Sources/tree/spielwiese/omalloc
+
+# Requires:
+# Conflicts:
+
+Cflags: -I${includedir} -DOM_NDEBUG
+Libs: -L${libdir} -lomalloc
+# Libs.private:
+

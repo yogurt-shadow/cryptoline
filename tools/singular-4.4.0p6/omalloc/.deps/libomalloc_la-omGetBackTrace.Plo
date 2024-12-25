@@ -1,0 +1,4 @@
+libomalloc_la-omGetBackTrace.lo: omGetBackTrace.c \
+ /usr/include/stdc-predef.h ../omalloc/omConfig.h
+/usr/include/stdc-predef.h:
+../omalloc/omConfig.h:
